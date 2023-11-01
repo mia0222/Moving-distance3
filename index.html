@@ -27,24 +27,48 @@
             }
     
             function calculateDistance(lat1, lon1, lat2, lon2) {
-                const RX = 6378.137; // 赤道半径 [km]
-                const RY = 6356.752; // 極半径 [km]
-    
-                lat1 = deg2rad(lat1);
-                lon1 = deg2rad(lon1);
-                lat2 = deg2rad(lat2);
-                lon2 = deg2rad(lon2);
-    
-                const p1 = Math.atan(RY / RX * Math.tan(lat1)); // 地点Aの化成緯度
-                const p2 = Math.atan(RY / RX * Math.tan(lat2)); // 地点Bの化成緯度
-                const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2)); // 球面上の距離
-                const F = (RX - RY) / RX; // 扁平率
-    
-                // 距離補正量
-                const dr = (F / 8) * ((Math.sin(X) - X) * Math.pow((Math.sin(p1) + Math.sin(p2)), 2.0) / Math.pow(Math.cos(X / 2), 2.0) - (Math.sin(X) + X) * Math.pow((Math.sin(p1) - Math.sin(p2)), 2.0) / Math.pow(Math.sin(X / 2), 2.0));
-    
-                return RX * (X + dr) * 1000; // 距離 [m]
-            }
+    const RX = 6378.137; // 赤道半径 [km]
+    const RY = 6356.752; // 極半径 [km]
+
+    // Check for invalid input coordinates
+    if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) {
+        return NaN; // Invalid input coordinates
+    }
+
+    lat1 = deg2rad(lat1);
+    lon1 = deg2rad(lon1);
+    lat2 = deg2rad(lat2);
+    lon2 = deg2rad(lon2);
+
+    const p1 = Math.atan(RY / RX * Math.tan(lat1); // 地点Aの化成緯度
+    const p2 = Math.atan(RY / RX * Math.tan(lat2); // 地点Bの化成緯度
+
+    // Check for invalid intermediate results
+    if (isNaN(p1) || isNaN(p2)) {
+        return NaN; // Invalid intermediate calculation results
+    }
+
+    const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2)); // 球面上の距離
+
+    // Check for invalid calculation results
+    if (isNaN(X)) {
+        return NaN; // Invalid calculation result
+    }
+
+    const F = (RX - RY) / RX; // 扁平率
+
+    // Calculate the distance correction
+    const dr = (F / 8) * (
+        (Math.sin(X) - X) * Math.pow((Math.sin(p1) + Math.sin(p2)), 2.0) / Math.pow(Math.cos(X / 2), 2.0) - (Math.sin(X) + X) * Math.pow((Math.sin(p1) - Math.sin(p2)), 2.0) / Math.pow(Math.sin(X / 2), 2.0)
+    );
+
+    // Check for invalid calculation results
+    if (isNaN(dr)) {
+        return NaN; // Invalid calculation result
+    }
+
+    return RX * (X + dr) * 1000; // 距離 [m]
+}
     
             function displayLocation(position) {
                 var latitude = position.coords.latitude;
