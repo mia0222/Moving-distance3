@@ -27,25 +27,26 @@
             return deg * (Math.PI / 180.0);
         }
 
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const RX = 6378.137; // 赤道半径 [km]
-            const RY = 6356.752; // 極半径 [km]
+       function calculateDistance(lat1, lon1, lat2, lon2) {
+    const RX = 6378.137; // 赤道半径 [km]
+    const RY = 6356.752; // 極半径 [km]
 
-            lat1 = deg2rad(lat1);
-            lon1 = deg2rad(lon1);
-            lat2 = deg2rad(lat2);
-            lon2 = deg2rad(lon2);
+    lat1 = deg2rad(lat1);
+    lon1 = deg2rad(lon1);
+    lat2 = deg2rad(lat2);
+    lon2 = deg2rad(lon2);
 
-            const p1 = Math.atan(RY / RX * Math.tan(lat1)); // 地点Aの化成緯度
-            const p2 = Math.atan(RY / RX * Math.tan(lat2)); // 地点Bの化成緯度
-            const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2)); // 球面上の距離
-            const F = (RX - RY) / RX; // 扁平率
+    const p1 = Math.atan(RY / RX * Math.tan(lat1)); // 地点Aの化成緯度
+    const p2 = Math.atan(RY / RX * Math.tan(lat2)); // 地点Bの化成緯度
+    const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2)); // 球面上の距離
+    const F = (RX - RY) / RX; // 扁平率
 
-            // 距離補正量
-            const dr = (F / 8) * ((Math.sin(X) - X) * Math.pow((Math.sin(p1) + Math.sin(p2)), 2.0) / Math.pow(Math.cos(X / 2), 2.0) - (Math.sin(X) + X) * Math.pow((Math.sin(p1) - Math.sin(p2)), 2.0) / Math.pow(Math.sin(X / 2), 2.0));
+    // 距離補正量
+    const dr = (F / 8) * ((Math.sin(X) - X) * Math.pow((Math.sin(p1) + Math.sin(p2)), 2.0) / Math.pow(Math.cos(X / 2), 2.0) - (Math.sin(X) + X) * Math.pow((Math.sin(p1) - Math.sin(p2)), 2.0) / Math.pow(Math.sin(X / 2), 2.0));
 
-            return RX * (X + dr) * 1000; // 距離 [m]
-        }
+    const distance = RX * (X + dr) * 1000; // 距離 [m]
+    return distance;
+}
 
         function displayLocation(position) {
             var latitude = position.coords.latitude;
