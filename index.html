@@ -20,6 +20,9 @@
         var lastPosition = null;
         var totalDistance = 0; // 移動距離の累積
 
+        // 初回の位置情報取得後にlastPositionを設定
+        var isFirstLocation = true;
+
         function deg2rad(deg) {
             return deg * (Math.PI / 180.0);
         }
@@ -51,7 +54,7 @@
             locationDataElement.innerHTML = "緯度: " + latitude + "<br>経度: " + longitude;
 
             // 移動距離を計算
-            if (lastPosition) {
+            if (lastPosition && !isFirstLocation) {
                 var lastLat = lastPosition.coords.latitude;
                 var lastLng = lastPosition.coords.longitude;
 
@@ -61,6 +64,11 @@
             }
 
             lastPosition = position;
+
+            // 初回の位置情報取得が完了
+            if (isFirstLocation) {
+                isFirstLocation = false;
+            }
         }
 
         function startLocationTracking() {
