@@ -38,7 +38,7 @@
 
             const p1 = Math.atan(RY / RX * Math.tan(lat1)); // 地点Aの化成緯度
             const p2 = Math.atan(RY / RX * Math.tan(lat2)); // 地点Bの化成緯度
-            const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2); // 球面上の距離
+            const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2)); // 球面上の距離
             const F = (RX - RY) / RX; // 扁平率
 
             // 距離補正量
