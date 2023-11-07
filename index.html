@@ -5,92 +5,91 @@
 <title>位置情報取得</title>
 </head>
 <body>
-    <body>
-        <h1>位置情報と移動距離の計算</h1>
-        <p id="locationData">位置情報はここに表示されます.</p>
-        <p id="distance">移動距離: 0 メートル</p>
-        <button id="startButton">開始</button>
-        <button id="stopButton">停止</button>
-    
-        <script>
-            var locationDataElement = document.getElementById("locationData");
-            var distanceElement = document.getElementById("distance");
-            var startButton = document.getElementById("startButton");
-            var stopButton = document.getElementById("stopButton");
-            var watchID = null; // 位置情報の監視ID
-            var lastPosition = null;
-            var totalDistance = 0; // 移動距離の累積
-    
-            function deg2rad(deg) {
-                return deg * (Math.PI / 180.0);
+    <h1>位置情報と移動距離の計算</h1>
+    <p id="locationData">位置情報はここに表示されます.</p>
+    <p id="distance">移動距離: 0 メートル</p>
+    <button id="startButton">開始</button>
+    <button id="stopButton">停止</button>
+
+    <script>
+        var locationDataElement = document.getElementById("locationData");
+        var distanceElement = document.getElementById("distance");
+        var startButton = document.getElementById("startButton");
+        var stopButton = document.getElementById("stopButton");
+        var watchID = null; // 位置情報の監視ID
+        var lastPosition = null;
+        var totalDistance = 0; // 移動距離の累積
+
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180.0);
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const RX = 6378.137; // 赤道半径 [km]
+            const RY = 6356.752; // 極半径 [km]
+
+            lat1 = deg2rad(lat1);
+            lon1 = deg2rad(lon1);
+            lat2 = deg2rad(lat2);
+            lon2 = deg2rad(lon2);
+
+            const p1 = Math.atan(RY / RX * Math.tan(lat1)); // 地点Aの化成緯度
+            const p2 = Math.atan(RY / RX * Math.tan(lat2)); // 地点Bの化成緯度
+            const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2)); // 球面上の距離
+            const F = (RX - RY) / RX; // 扁平率
+
+            // 距離補正量
+            const dr = (F / 8) * ((Math.sin(X) - X) * Math.pow((Math.sin(p1) + Math.sin(p2)), 2.0) / Math.pow(Math.cos(X / 2), 2.0) - (Math.sin(X) + X) * Math.pow((Math.sin(p1) - Math.sin(p2)), 2.0) / Math.pow(Math.sin(X / 2), 2.0));
+
+            return RX * (X + dr) * 1000; // 距離 [m]
+        }
+
+        function displayLocation(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+
+            locationDataElement.innerHTML = "緯度: " + latitude + "<br>経度: " + longitude;
+
+            // 移動距離を計算
+            if (lastPosition) {
+                var lastLat = lastPosition.coords.latitude;
+                var lastLng = lastPosition.coords.longitude;
+
+                var distance = calculateDistance(lastLat, lastLng, latitude, longitude);
+                totalDistance += distance; // 移動距離を累積
+                distanceElement.innerHTML = "移動距離: " + totalDistance.toFixed(2) + " メートル";
             }
-    
-            function calculateDistance(lat1, lon1, lat2, lon2) {
-                const RX = 6378.137; // 赤道半径 [km]
-                const RY = 6356.752; // 極半径 [km]
-    
-                lat1 = deg2rad(lat1);
-                lon1 = deg2rad(lon1);
-                lat2 = deg2rad(lat2);
-                lon2 = deg2rad(lon2);
-    
-                const p1 = Math.atan(RY / RX * Math.tan(lat1)); // 地点Aの化成緯度
-                const p2 = Math.atan(RY / RX * Math.tan(lat2)); // 地点Bの化成緯度
-                const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2)); // 球面上の距離
-                const F = (RX - RY) / RX; // 扁平率
-    
-                // 距離補正量
-                const dr = (F / 8) * ((Math.sin(X) - X) * Math.pow((Math.sin(p1) + Math.sin(p2)), 2.0) / Math.pow(Math.cos(X / 2), 2.0) - (Math.sin(X) + X) * Math.pow((Math.sin(p1) - Math.sin(p2)), 2.0) / Math.pow(Math.sin(X / 2), 2.0));
-    
-                return RX * (X + dr) * 1000; // 距離 [m]
+
+            lastPosition = position;
+        }
+
+        function startLocationTracking() {
+            if ("geolocation" in navigator) {
+                // 位置情報の監視を開始
+                watchID = navigator.geolocation.watchPosition(displayLocation, function (error) {
+                    console.error("位置情報の取得に失敗しました: " + error.message);
+                });
+                startButton.disabled = true;
+                stopButton.disabled = false;
+            } else {
+                console.error("Geolocationがサポートされていません");
             }
-    
-            function displayLocation(position) {
-                var latitude = position.coords.latitude;
-                var longitude = position.coords.longitude;
-    
-                locationDataElement.innerHTML = "緯度: " + latitude + "<br>経度: " + longitude;
-    
-                // 移動距離を計算
-                if (lastPosition) {
-                    var lastLat = lastPosition.coords.latitude;
-                    var lastLng = lastPosition.coords.longitude;
-    
-                    var distance = calculateDistance(lastLat, lastLng, latitude, longitude);
-                    totalDistance += distance; // 移動距離を累積
-                    distanceElement.innerHTML = "移動距離: " + totalDistance.toFixed(2) + " メートル";
-                }
-    
-                lastPosition = position;
+        }
+
+        function stopLocationTracking() {
+            if (watchID !== null) {
+                // 位置情報の監視を停止
+                navigator.geolocation.clearWatch(watchID);
+                watchID = null;
+                startButton.disabled = false;
+                stopButton.disabled = true;
             }
-    
-            function startLocationTracking() {
-                if ("geolocation" in navigator) {
-                    // 位置情報の監視を開始
-                    watchID = navigator.geolocation.watchPosition(displayLocation, function (error) {
-                        console.error("位置情報の取得に失敗しました: " + error.message);
-                    });
-                    startButton.disabled = true;
-                    stopButton.disabled = false;
-                } else {
-                    console.error("Geolocationがサポートされていません");
-                }
-            }
-    
-            function stopLocationTracking() {
-                if (watchID !== null) {
-                    // 位置情報の監視を停止
-                    navigator.geolocation.clearWatch(watchID);
-                    watchID = null;
-                    startButton.disabled = false;
-                    stopButton.disabled = true;
-                }
-            }
-    
-            // 開始ボタンと停止ボタンのクリックイベント
-            startButton.addEventListener("click", startLocationTracking);
-            stopButton.addEventListener("click", stopLocationTracking);
-            stopButton.disabled = true;
-        </script>
+        }
+
+        // 開始ボタンと停止ボタンのクリックイベント
+        startButton.addEventListener("click", startLocationTracking);
+        stopButton.addEventListener("click", stopLocationTracking);
+        stopButton.disabled = true;
+    </script>
 </body>
 </html>
