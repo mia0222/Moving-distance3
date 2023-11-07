@@ -38,7 +38,7 @@
 
             const p1 = Math.atan(RY / RX * Math.tan(lat1)); // 地点Aの化成緯度
             const p2 = Math.atan(RY / RX * Math.tan(lat2)); // 地点Bの化成緯度
-            const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2)); // 球面上の距離
+            const X = Math.acos(Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(lon1 - lon2); // 球面上の距離
             const F = (RX - RY) / RX; // 扁平率
 
             // 距離補正量
@@ -50,8 +50,9 @@
         function displayLocation(position) {
             var latitude = position.coords.latitude;
             var longitude = position.coords.longitude;
+            var timestamp = new Date(position.timestamp).toLocaleTimeString();
 
-            locationDataElement.innerHTML = "緯度: " + latitude + "<br>経度: " + longitude;
+            locationDataElement.innerHTML = "緯度: " + latitude + "<br>経度: " + longitude + "<br>情報取得時間: " + timestamp;
 
             // 移動距離を計算
             if (lastPosition && !isFirstLocation) {
